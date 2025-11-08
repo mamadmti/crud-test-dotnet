@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http.Json;
-using Mc2.CrudTest.Application.DTOs;
+using Mc2.CrudTest.Contracts;
 
 namespace Mc2.CrudTest.AcceptanceTests.Drivers;
 

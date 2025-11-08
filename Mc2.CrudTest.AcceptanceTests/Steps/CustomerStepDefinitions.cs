@@ -1,7 +1,7 @@
 using FluentAssertions;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
-using Mc2.CrudTest.Application.DTOs;
+using Mc2.CrudTest.Contracts;
 using Mc2.CrudTest.AcceptanceTests.Drivers;
 using System.Net.Http.Json;
 

@@ -1,4 +1,5 @@
 using Mc2.CrudTest.Presentation.Client;
+using Mc2.CrudTest.Presentation.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -13,6 +14,9 @@ namespace Mc2.CrudTest.Presentation.Client
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+            // Register CustomerService
+            builder.Services.AddScoped<CustomerService>();
 
             await builder.Build().RunAsync();
         }

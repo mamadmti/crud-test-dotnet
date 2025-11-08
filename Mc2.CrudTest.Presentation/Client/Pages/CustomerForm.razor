@@ -1,0 +1,179 @@
+@page "/customers/create"
+@page "/customers/edit/{id:guid}"
+@inject CustomerService CustomerService
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsEditMode ? "Edit Customer" : "Create Customer")</PageTitle>
+
+<h1>@(IsEditMode ? "Edit Customer" : "Create Customer")</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <EditForm Model="@customer" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name *</label>
+                <InputText id="firstName" class="form-control" @bind-Value="customer.FirstName" />
+            </div>
+
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name *</label>
+                <InputText id="lastName" class="form-control" @bind-Value="customer.LastName" />
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email *</label>
+                <InputText id="email" type="email" class="form-control" @bind-Value="customer.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label for="phoneNumber" class="form-label">Phone Number * (Mobile only, e.g., +14155552671)</label>
+                <InputText id="phoneNumber" class="form-control" @bind-Value="customer.PhoneNumber" placeholder="+14155552671" />
+            </div>
+
+            <div class="mb-3">
+                <label for="dateOfBirth" class="form-label">Date of Birth *</label>
+                <InputDate id="dateOfBirth" class="form-control" @bind-Value="customer.DateOfBirth" />
+            </div>
+
+            <div class="mb-3">
+                <label for="bankAccount" class="form-label">Bank Account Number * (IBAN format)</label>
+                <InputText id="bankAccount" class="form-control" @bind-Value="customer.BankAccountNumber" placeholder="GB82WEST12345698765432" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">
+                    @errorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">
+                    @successMessage
+                </div>
+            }
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary me-2" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    <span class="oi oi-check"></span> @(IsEditMode ? "Update" : "Create")
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                    <span class="oi oi-x"></span> Cancel
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private CustomerDto customer = new CustomerDto
+    {
+        DateOfBirth = DateTime.Today.AddYears(-25)
+    };
+
+    private bool IsEditMode => Id.HasValue && Id.Value != Guid.Empty;
+    private bool isSaving = false;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEditMode)
+        {
+            await LoadCustomer();
+        }
+    }
+
+    private async Task LoadCustomer()
+    {
+        try
+        {
+            var existingCustomer = await CustomerService.GetCustomerByIdAsync(Id!.Value);
+            if (existingCustomer != null)
+            {
+                customer = existingCustomer;
+            }
+            else
+            {
+                errorMessage = "Customer not found";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading customer: {ex.Message}";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            isSaving = true;
+            errorMessage = string.Empty;
+            successMessage = string.Empty;
+
+            if (IsEditMode)
+            {
+                await CustomerService.UpdateCustomerAsync(Id!.Value, customer);
+                successMessage = "Customer updated successfully!";
+            }
+            else
+            {
+                await CustomerService.CreateCustomerAsync(customer);
+                successMessage = "Customer created successfully!";
+            }
+
+            await Task.Delay(1000);
+            Navigation.NavigateTo("/customers");
+        }
+        catch (HttpRequestException ex)
+        {
+            var response = ex.Message;
+            if (response.Contains("400"))
+            {
+                errorMessage = "Validation error. Please check your input.";
+            }
+            else if (response.Contains("Customer already exists"))
+            {
+                errorMessage = "A customer with the same name and date of birth already exists.";
+            }
+            else if (response.Contains("Email address already exists"))
+            {
+                errorMessage = "This email address is already in use.";
+            }
+            else if (response.Contains("mobile"))
+            {
+                errorMessage = "Only mobile phone numbers are allowed.";
+            }
+            else
+            {
+                errorMessage = $"Error saving customer: {ex.Message}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error saving customer: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/customers");
+    }
+}
+

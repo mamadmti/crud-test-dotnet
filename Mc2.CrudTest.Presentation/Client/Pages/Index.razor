@@ -1,9 +1,71 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Welcome to Customer Management System</h1>
 
-Welcome to your new app.
+<p class="lead">
+    A modern CRUD application built with Clean Architecture, DDD, and CQRS principles.
+</p>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <span class="oi oi-people me-2"></span>
+                    Manage Customers
+                </h5>
+                <p class="card-text">
+                    Create, view, update, and delete customer records with full validation.
+                </p>
+                <a href="customers" class="btn btn-primary">
+                    Go to Customers
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <span class="oi oi-shield me-2"></span>
+                    Features
+                </h5>
+                <ul class="list-unstyled">
+                    <li><span class="oi oi-check text-success"></span> Email validation and uniqueness</li>
+                    <li><span class="oi oi-check text-success"></span> Mobile phone number validation</li>
+                    <li><span class="oi oi-check text-success"></span> IBAN bank account validation</li>
+                    <li><span class="oi oi-check text-success"></span> Duplicate customer detection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <h3>Technology Stack</h3>
+    <div class="row">
+        <div class="col-md-4">
+            <ul>
+                <li><strong>Frontend:</strong> Blazor WebAssembly</li>
+                <li><strong>Backend:</strong> ASP.NET Core 7</li>
+                <li><strong>Database:</strong> SQL Server</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <ul>
+                <li><strong>Architecture:</strong> Clean Architecture</li>
+                <li><strong>Patterns:</strong> CQRS, DDD</li>
+                <li><strong>ORM:</strong> Entity Framework Core</li>
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <ul>
+                <li><strong>Validation:</strong> FluentValidation</li>
+                <li><strong>Testing:</strong> xUnit, SpecFlow</li>
+                <li><strong>Mediator:</strong> MediatR</li>
+            </ul>
+        </div>
+    </div>
+</div>

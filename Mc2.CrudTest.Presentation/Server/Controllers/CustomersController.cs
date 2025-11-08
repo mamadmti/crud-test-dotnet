@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.Queries;
-using Mc2.CrudTest.Application.DTOs;
+using Mc2.CrudTest.Contracts;
 
 namespace Mc2.CrudTest.Presentation.Server.Controllers;
 
