@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Xunit;
+using Mc2.CrudTest.Domain.ValueObjects;
 
 namespace Mc2.CrudTest.UnitTests.Domain.ValueObjects;
 
@@ -12,7 +13,12 @@ public class BankAccountNumberTests
     [InlineData("IT60X0542811101000000123456")]  // Italy IBAN
     public void BankAccountNumber_ShouldBeCreated_WithValidIBAN(string validIban)
     {
-        Assert.True(true, $"TODO: Implement BankAccountNumber value object - test with {validIban}");
+        // Act
+        var bankAccount = new BankAccountNumber(validIban);
+
+        // Assert
+        bankAccount.Should().NotBeNull();
+        bankAccount.Value.Should().Be(validIban.Replace(" ", "").ToUpperInvariant());
     }
 
     [Theory]
@@ -22,34 +28,51 @@ public class BankAccountNumberTests
     [InlineData("XX82WEST12345698765432")]  // Invalid country code
     public void BankAccountNumber_ShouldNotBeCreated_WithInvalidFormat(string invalidAccountNumber)
     {
-        Assert.True(true, $"TODO: Implement bank account validation - test with {invalidAccountNumber}");
+        // Act & Assert
+        Action act = () => new BankAccountNumber(invalidAccountNumber);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void BankAccountNumber_ShouldValidate_ChecksumForIBAN()
     {
+        // Arrange
         var validIban = "GB82WEST12345698765432";
         var invalidChecksumIban = "GB00WEST12345698765432"; // Wrong checksum
 
-        Assert.True(true, "TODO: Implement IBAN checksum validation");
+        // Act
+        var validAccount = new BankAccountNumber(validIban);
+        Action invalidAct = () => new BankAccountNumber(invalidChecksumIban);
+
+        // Assert
+        validAccount.Should().NotBeNull();
+        invalidAct.Should().Throw<ArgumentException>()
+            .WithMessage("*checksum*");
     }
 
     [Fact]
     public void BankAccountNumber_ShouldNormalize_RemovingSpaces()
     {
+        // Arrange
         var ibanWithSpaces = "GB82 WEST 1234 5698 7654 32";
         var expectedNormalized = "GB82WEST12345698765432";
 
-        Assert.True(true, "TODO: Implement space normalization");
+        // Act
+        var bankAccount = new BankAccountNumber(ibanWithSpaces);
+
+        // Assert
+        bankAccount.Value.Should().Be(expectedNormalized);
     }
 
     [Fact]
     public void BankAccountNumber_ShouldBeEqual_WhenValuesAreSame()
     {
-        var iban1 = "GB82WEST12345698765432";
-        var iban2 = "GB82WEST12345698765432";
+        // Arrange
+        var iban1 = new BankAccountNumber("GB82WEST12345698765432");
+        var iban2 = new BankAccountNumber("GB82WEST12345698765432");
 
-        Assert.True(true, "TODO: Implement value object equality");
+        // Act & Assert
+        iban1.Should().Be(iban2);
+        (iban1 == iban2).Should().BeTrue();
     }
 }
-

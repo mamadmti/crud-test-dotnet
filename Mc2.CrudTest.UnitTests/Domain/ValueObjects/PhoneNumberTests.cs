@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Xunit;
+using Mc2.CrudTest.Domain.ValueObjects;
 
 namespace Mc2.CrudTest.UnitTests.Domain.ValueObjects;
 
@@ -13,10 +14,11 @@ public class PhoneNumberTests
     public void PhoneNumber_ShouldBeCreated_WithValidMobileNumber(string validMobileNumber)
     {
         // Act
+        var phoneNumber = new PhoneNumber(validMobileNumber);
 
         // Assert
-
-        Assert.True(true, $"TODO: Implement PhoneNumber value object - test with {validMobileNumber}");
+        phoneNumber.Should().NotBeNull();
+        phoneNumber.Value.Should().Be(validMobileNumber);
     }
 
     [Theory]
@@ -26,34 +28,46 @@ public class PhoneNumberTests
     [InlineData("+442071234567")]  // UK landline (not mobile)
     public void PhoneNumber_ShouldNotBeCreated_WithInvalidNumber(string invalidNumber)
     {
-        Assert.True(true, $"TODO: Implement phone validation - test with {invalidNumber}");
+        // Act & Assert
+        Action act = () => new PhoneNumber(invalidNumber);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void PhoneNumber_ShouldReject_LandlineNumbers()
     {
-
+        // Arrange
         var landlineNumber = "+442071234567"; // UK landline
 
-        Assert.True(true, "TODO: Implement mobile-only validation using libphonenumber");
+        // Act & Assert
+        Action act = () => new PhoneNumber(landlineNumber);
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*Only mobile phone numbers are allowed*");
     }
 
     [Fact]
     public void PhoneNumber_ShouldStore_InMinimalSpaceFormat()
     {
-        var phoneNumber = "+14155552671";
+        // Arrange & Act
+        var phoneNumber = new PhoneNumber("+14155552671");
 
-        Assert.True(true, "TODO: Implement space-efficient phone number storage");
+        // Assert
+        phoneNumber.Value.Should().Be("+14155552671"); // E.164 format is minimal
+        phoneNumber.Value.Length.Should().Be(12); // Compact format
     }
 
     [Fact]
     public void PhoneNumber_ShouldNormalize_ToE164Format()
     {
-
+        // Arrange
         var phoneWithSpaces = "+1 415 555 2671";
         var expectedNormalized = "+14155552671";
 
-        Assert.True(true, "TODO: Implement E.164 normalization");
+        // Act
+        var phoneNumber = new PhoneNumber(phoneWithSpaces);
+
+        // Assert
+        phoneNumber.Value.Should().Be(expectedNormalized);
     }
 }
 

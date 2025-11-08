@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Xunit;
+using Mc2.CrudTest.Domain.ValueObjects;
 
 namespace Mc2.CrudTest.UnitTests.Domain.ValueObjects;
 
@@ -12,8 +13,12 @@ public class EmailTests
     [InlineData("test123@test-domain.com")]
     public void Email_ShouldBeCreated_WithValidFormat(string validEmail)
     {
+        // Act
+        var email = new Email(validEmail);
 
-        Assert.True(true, $"TODO: Implement Email value object - test with {validEmail}");
+        // Assert
+        email.Should().NotBeNull();
+        email.Value.Should().Be(validEmail.ToLowerInvariant());
     }
 
     [Theory]
@@ -25,26 +30,33 @@ public class EmailTests
     [InlineData("user@.com")]
     public void Email_ShouldNotBeCreated_WithInvalidFormat(string invalidEmail)
     {
-
-        Assert.True(true, $"TODO: Implement Email validation - test with {invalidEmail}");
+        // Act & Assert
+        Action act = () => new Email(invalidEmail);
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void Email_ShouldBeEqual_WhenValuesAreSame()
     {
-        var email1 = "test@example.com";
-        var email2 = "test@example.com";
+        // Arrange
+        var email1 = new Email("test@example.com");
+        var email2 = new Email("test@example.com");
 
-        Assert.True(true, "TODO: Implement value object equality");
+        // Act & Assert
+        email1.Should().Be(email2);
+        (email1 == email2).Should().BeTrue();
     }
 
     [Fact]
     public void Email_ShouldBeCaseInsensitive()
     {
-        var email1 = "Test@Example.COM";
-        var email2 = "test@example.com";
+        // Arrange
+        var email1 = new Email("Test@Example.COM");
+        var email2 = new Email("test@example.com");
 
-        Assert.True(true, "TODO: Implement case-insensitive email comparison");
+        // Act & Assert
+        email1.Should().Be(email2);
+        email1.Value.Should().Be("test@example.com");
     }
 }
 
