@@ -1,80 +1,172 @@
 using FluentAssertions;
 using TechTalk.SpecFlow;
 using TechTalk.SpecFlow.Assist;
+using Mc2.CrudTest.Application.DTOs;
+using Mc2.CrudTest.AcceptanceTests.Drivers;
+using System.Net.Http.Json;
 
 namespace Mc2.CrudTest.AcceptanceTests.Steps;
 
 [Binding]
-public class CustomerStepDefinitions
+public class CustomerStepDefinitions : IDisposable
 {
     private readonly ScenarioContext _scenarioContext;
-    private object? _customerRequest;
-    private object? _customerResponse;
-    private Exception? _lastException;
+    private CustomerApiDriver? _apiDriver;
+    private CustomerDto? _customerRequest;
+    private HttpResponseMessage? _lastResponse;
+    private List<CustomerDto> _createdCustomers = new();
 
     public CustomerStepDefinitions(ScenarioContext scenarioContext)
     {
         _scenarioContext = scenarioContext;
     }
 
+    private CustomerApiDriver ApiDriver => _apiDriver ??= new CustomerApiDriver();
+
     #region Given Steps
 
     [Given(@"I have a valid customer with the following details:")]
     public void GivenIHaveAValidCustomerWithTheFollowingDetails(Table table)
     {
-        // var customerData = table.CreateInstance<CustomerDto>();
-        // _customerRequest = customerData;
+        var dict = table.Rows[0].ToDictionary(r => r.Key, r => r.Value);
 
-        _scenarioContext.Pending();
+        _customerRequest = new CustomerDto
+        {
+            FirstName = dict["FirstName"],
+            LastName = dict["LastName"],
+            DateOfBirth = DateTime.Parse(dict["DateOfBirth"]),
+            PhoneNumber = dict["PhoneNumber"],
+            Email = dict["Email"],
+            BankAccountNumber = dict["BankAccountNumber"]
+        };
     }
 
     [Given(@"I have a customer with an invalid phone number ""(.*)""")]
     public void GivenIHaveACustomerWithAnInvalidPhoneNumber(string phoneNumber)
     {
-
-        _scenarioContext.Pending();
+        _customerRequest = new CustomerDto
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 15),
+            PhoneNumber = phoneNumber,
+            Email = "test@example.com",
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
     }
 
     [Given(@"I have a customer with an invalid email ""(.*)""")]
     public void GivenIHaveACustomerWithAnInvalidEmail(string email)
     {
-
-        _scenarioContext.Pending();
+        _customerRequest = new CustomerDto
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 15),
+            PhoneNumber = "+14155552671",
+            Email = email,
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
     }
 
     [Given(@"I have a customer with a landline phone number ""(.*)""")]
     public void GivenIHaveACustomerWithALandlinePhoneNumber(string phoneNumber)
     {
-
-        _scenarioContext.Pending();
+        _customerRequest = new CustomerDto
+        {
+            FirstName = "John",
+            LastName = "Doe",
+            DateOfBirth = new DateTime(1990, 1, 15),
+            PhoneNumber = phoneNumber,
+            Email = "test@example.com",
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
     }
 
     [Given(@"I have created a customer with:")]
-    public void GivenIHaveCreatedACustomerWith(Table table)
+    public async Task GivenIHaveCreatedACustomerWith(Table table)
     {
+        var dict = table.Rows[0].ToDictionary(r => r.Key, r => r.Value);
 
-        _scenarioContext.Pending();
+        var customer = new CustomerDto
+        {
+            FirstName = dict["FirstName"],
+            LastName = dict["LastName"],
+            DateOfBirth = DateTime.Parse(dict["DateOfBirth"]),
+            PhoneNumber = "+14155552671",
+            Email = dict["Email"],
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
+
+        var response = await ApiDriver.CreateCustomerAsync(customer);
+        response.EnsureSuccessStatusCode();
+
+        var created = await response.Content.ReadFromJsonAsync<CustomerDto>();
+        _createdCustomers.Add(created!);
+        _customerRequest = customer;
     }
 
     [Given(@"I have created a customer with email ""(.*)""")]
-    public void GivenIHaveCreatedACustomerWithEmail(string email)
+    public async Task GivenIHaveCreatedACustomerWithEmail(string email)
     {
+        var customer = new CustomerDto
+        {
+            FirstName = "Existing",
+            LastName = "Customer",
+            DateOfBirth = new DateTime(1990, 1, 15),
+            PhoneNumber = "+14155552671",
+            Email = email,
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
 
-        _scenarioContext.Pending();
+        var response = await ApiDriver.CreateCustomerAsync(customer);
+        response.EnsureSuccessStatusCode();
+
+        var created = await response.Content.ReadFromJsonAsync<CustomerDto>();
+        _createdCustomers.Add(created!);
     }
 
     [Given(@"I have created a customer")]
-    public void GivenIHaveCreatedACustomer()
+    public async Task GivenIHaveCreatedACustomer()
     {
+        var customer = new CustomerDto
+        {
+            FirstName = "Test",
+            LastName = "Customer",
+            DateOfBirth = new DateTime(1990, 1, 15),
+            PhoneNumber = "+14155552671",
+            Email = $"test{Guid.NewGuid()}@example.com",
+            BankAccountNumber = "GB82WEST12345698765432"
+        };
 
-        _scenarioContext.Pending();
+        var response = await ApiDriver.CreateCustomerAsync(customer);
+        response.EnsureSuccessStatusCode();
+
+        var created = await response.Content.ReadFromJsonAsync<CustomerDto>();
+        _createdCustomers.Add(created!);
     }
 
     [Given(@"I have created (.*) customers")]
-    public void GivenIHaveCreatedMultipleCustomers(int count)
+    public async Task GivenIHaveCreatedMultipleCustomers(int count)
     {
+        for (int i = 0; i < count; i++)
+        {
+            var customer = new CustomerDto
+            {
+                FirstName = $"Customer{i}",
+                LastName = $"Test{i}",
+                DateOfBirth = new DateTime(1990, 1, 15).AddDays(i),
+                PhoneNumber = "+14155552671",
+                Email = $"customer{i}@example.com",
+                BankAccountNumber = "GB82WEST12345698765432"
+            };
 
-        _scenarioContext.Pending();
+            var response = await ApiDriver.CreateCustomerAsync(customer);
+            response.EnsureSuccessStatusCode();
+
+            var created = await response.Content.ReadFromJsonAsync<CustomerDto>();
+            _createdCustomers.Add(created!);
+        }
     }
 
     #endregion
@@ -82,78 +174,69 @@ public class CustomerStepDefinitions
     #region When Steps
 
     [When(@"I create the customer")]
-    public void WhenICreateTheCustomer()
+    public async Task WhenICreateTheCustomer()
     {
-        // Use HTTP client to POST to /api/customers
-
-        _scenarioContext.Pending();
+        _lastResponse = await ApiDriver.CreateCustomerAsync(_customerRequest!);
     }
 
     [When(@"I attempt to create the customer")]
-    public void WhenIAttemptToCreateTheCustomer()
+    public async Task WhenIAttemptToCreateTheCustomer()
     {
-        try
-        {
-            // Store exception for later assertion
-
-            _scenarioContext.Pending();
-        }
-        catch (Exception ex)
-        {
-            _lastException = ex;
-        }
+        _lastResponse = await ApiDriver.CreateCustomerAsync(_customerRequest!);
     }
 
     [When(@"I attempt to create another customer with the same FirstName, LastName, and DateOfBirth")]
-    public void WhenIAttemptToCreateAnotherCustomerWithTheSameDetails()
+    public async Task WhenIAttemptToCreateAnotherCustomerWithTheSameDetails()
     {
-        try
+        var duplicateCustomer = new CustomerDto
         {
+            FirstName = _customerRequest!.FirstName,
+            LastName = _customerRequest.LastName,
+            DateOfBirth = _customerRequest.DateOfBirth,
+            PhoneNumber = "+14155559999",
+            Email = "different@example.com",
+            BankAccountNumber = "FR1420041010050500013M02606"
+        };
 
-            _scenarioContext.Pending();
-        }
-        catch (Exception ex)
-        {
-            _lastException = ex;
-        }
+        _lastResponse = await ApiDriver.CreateCustomerAsync(duplicateCustomer);
     }
 
     [When(@"I attempt to create another customer with email ""(.*)""")]
-    public void WhenIAttemptToCreateAnotherCustomerWithEmail(string email)
+    public async Task WhenIAttemptToCreateAnotherCustomerWithEmail(string email)
     {
-        try
+        var customer = new CustomerDto
         {
+            FirstName = "Different",
+            LastName = "Person",
+            DateOfBirth = new DateTime(1995, 6, 10),
+            PhoneNumber = "+14155559999",
+            Email = email,
+            BankAccountNumber = "FR1420041010050500013M02606"
+        };
 
-            _scenarioContext.Pending();
-        }
-        catch (Exception ex)
-        {
-            _lastException = ex;
-        }
+        _lastResponse = await ApiDriver.CreateCustomerAsync(customer);
     }
 
     [When(@"I update the customer's phone number to ""(.*)""")]
-    public void WhenIUpdateTheCustomersPhoneNumberTo(string phoneNumber)
+    public async Task WhenIUpdateTheCustomersPhoneNumberTo(string phoneNumber)
     {
-        // Use HTTP client to PUT to /api/customers/{id}
+        var customer = _createdCustomers.Last();
+        customer.PhoneNumber = phoneNumber;
 
-        _scenarioContext.Pending();
+        _lastResponse = await ApiDriver.UpdateCustomerAsync(customer.Id, customer);
     }
 
     [When(@"I delete the customer")]
-    public void WhenIDeleteTheCustomer()
+    public async Task WhenIDeleteTheCustomer()
     {
-        // Use HTTP client to DELETE to /api/customers/{id}
-
-        _scenarioContext.Pending();
+        var customerId = _createdCustomers.Last().Id;
+        _lastResponse = await ApiDriver.DeleteCustomerAsync(customerId);
     }
 
     [When(@"I request all customers")]
-    public void WhenIRequestAllCustomers()
+    public async Task WhenIRequestAllCustomers()
     {
-        // Use HTTP client to GET from /api/customers
-
-        _scenarioContext.Pending();
+        _lastResponse = await ApiDriver.GetAllCustomersAsync();
     }
 
     #endregion
@@ -163,72 +246,90 @@ public class CustomerStepDefinitions
     [Then(@"the customer should be created successfully")]
     public void ThenTheCustomerShouldBeCreatedSuccessfully()
     {
-        // _customerResponse.Should().NotBeNull();
-
-        _scenarioContext.Pending();
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeTrue();
     }
 
     [Then(@"the customer should be retrievable by email")]
-    public void ThenTheCustomerShouldBeRetrievableByEmail()
+    public async Task ThenTheCustomerShouldBeRetrievableByEmail()
     {
-        // Assert customer exists and matches expected data
+        var response = await ApiDriver.GetCustomerByEmailAsync(_customerRequest!.Email);
+        response.IsSuccessStatusCode.Should().BeTrue();
 
-        _scenarioContext.Pending();
+        var customer = await response.Content.ReadFromJsonAsync<CustomerDto>();
+        customer.Should().NotBeNull();
+        customer!.Email.Should().Be(_customerRequest.Email.ToLowerInvariant());
     }
 
     [Then(@"the creation should fail with validation error ""(.*)""")]
-    public void ThenTheCreationShouldFailWithValidationError(string expectedError)
+    public async Task ThenTheCreationShouldFailWithValidationError(string expectedError)
     {
-        // _lastException.Should().NotBeNull();
-        // errorMessage.Should().Contain(expectedError);
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeFalse();
 
-        _scenarioContext.Pending();
+        var content = await _lastResponse.Content.ReadAsStringAsync();
+        content.ToLowerInvariant().Should().Contain(expectedError.ToLowerInvariant());
     }
 
     [Then(@"the creation should fail with error ""(.*)""")]
-    public void ThenTheCreationShouldFailWithError(string expectedError)
+    public async Task ThenTheCreationShouldFailWithError(string expectedError)
     {
-        // _lastException.Should().NotBeNull();
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeFalse();
 
-        _scenarioContext.Pending();
+        var content = await _lastResponse.Content.ReadAsStringAsync();
+        content.ToLowerInvariant().Should().Contain(expectedError.ToLowerInvariant());
     }
 
     [Then(@"the customer should be updated successfully")]
     public void ThenTheCustomerShouldBeUpdatedSuccessfully()
     {
-
-        _scenarioContext.Pending();
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeTrue();
     }
 
     [Then(@"the customer's phone number should be ""(.*)""")]
-    public void ThenTheCustomersPhoneNumberShouldBe(string expectedPhoneNumber)
+    public async Task ThenTheCustomersPhoneNumberShouldBe(string expectedPhoneNumber)
     {
+        var customerId = _createdCustomers.Last().Id;
+        var response = await ApiDriver.GetCustomerByIdAsync(customerId);
+        response.IsSuccessStatusCode.Should().BeTrue();
 
-        _scenarioContext.Pending();
+        var customer = await response.Content.ReadFromJsonAsync<CustomerDto>();
+        customer.Should().NotBeNull();
+        customer!.PhoneNumber.Should().Be(expectedPhoneNumber);
     }
 
     [Then(@"the customer should be deleted successfully")]
     public void ThenTheCustomerShouldBeDeletedSuccessfully()
     {
-
-        _scenarioContext.Pending();
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeTrue();
     }
 
     [Then(@"the customer should not be retrievable")]
-    public void ThenTheCustomerShouldNotBeRetrievable()
+    public async Task ThenTheCustomerShouldNotBeRetrievable()
     {
-
-        _scenarioContext.Pending();
+        var customerId = _createdCustomers.Last().Id;
+        var response = await ApiDriver.GetCustomerByIdAsync(customerId);
+        response.IsSuccessStatusCode.Should().BeFalse();
     }
 
     [Then(@"I should receive (.*) customers")]
-    public void ThenIShouldReceiveCustomers(int expectedCount)
+    public async Task ThenIShouldReceiveCustomers(int expectedCount)
     {
-        // customers.Should().HaveCount(expectedCount);
+        _lastResponse.Should().NotBeNull();
+        _lastResponse!.IsSuccessStatusCode.Should().BeTrue();
 
-        _scenarioContext.Pending();
+        var customers = await _lastResponse.Content.ReadFromJsonAsync<List<CustomerDto>>();
+        customers.Should().NotBeNull();
+        customers!.Count.Should().BeGreaterOrEqualTo(expectedCount);
     }
 
     #endregion
-}
 
+    public void Dispose()
+    {
+        _apiDriver?.Dispose();
+    }
+}
