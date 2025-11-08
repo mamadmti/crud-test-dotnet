@@ -28,7 +28,11 @@ public class CustomerStepDefinitions : IDisposable
     [Given(@"I have a valid customer with the following details:")]
     public void GivenIHaveAValidCustomerWithTheFollowingDetails(Table table)
     {
-        var dict = table.Rows[0].ToDictionary(r => r.Key, r => r.Value);
+        var dict = new Dictionary<string, string>();
+        foreach (var row in table.Rows)
+        {
+            dict[row["Field"]] = row["Value"];
+        }
 
         _customerRequest = new CustomerDto
         {
@@ -86,7 +90,11 @@ public class CustomerStepDefinitions : IDisposable
     [Given(@"I have created a customer with:")]
     public async Task GivenIHaveCreatedACustomerWith(Table table)
     {
-        var dict = table.Rows[0].ToDictionary(r => r.Key, r => r.Value);
+        var dict = new Dictionary<string, string>();
+        foreach (var row in table.Rows)
+        {
+            dict[row["Field"]] = row["Value"];
+        }
 
         var customer = new CustomerDto
         {

@@ -176,7 +176,7 @@ this.ScenarioInitialize(scenarioInfo);
  testRunner.When("I attempt to create the customer", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 23
- testRunner.Then("the creation should fail with validation error \"Invalid mobile phone number\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+ testRunner.Then("the creation should fail with validation error \"Invalid phone number\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -218,7 +218,7 @@ this.ScenarioInitialize(scenarioInfo);
  testRunner.When("I attempt to create the customer", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 29
- testRunner.Then("the creation should fail with validation error \"Invalid email address\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+ testRunner.Then("the creation should fail with validation error \"Invalid email format\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
             }
             this.ScenarioCleanup();

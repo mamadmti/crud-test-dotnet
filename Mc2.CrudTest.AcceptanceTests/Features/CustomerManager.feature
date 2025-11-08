@@ -20,13 +20,13 @@ Scenario: Create a valid customer
 Scenario: Reject customer with invalid mobile phone number
 	Given I have a customer with an invalid phone number "+1234"
 	When I attempt to create the customer
-	Then the creation should fail with validation error "Invalid mobile phone number"
+	Then the creation should fail with validation error "Invalid phone number"
 
 @validation
 Scenario: Reject customer with invalid email
 	Given I have a customer with an invalid email "not-an-email"
 	When I attempt to create the customer
-	Then the creation should fail with validation error "Invalid email address"
+	Then the creation should fail with validation error "Invalid email format"
 
 @validation
 Scenario: Reject customer with landline phone number
