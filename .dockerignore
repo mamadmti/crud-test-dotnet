@@ -1,0 +1,12 @@
+**/.vs
+**/bin
+**/obj
+**/.git
+**/.gitignore
+**/.dockerignore
+**/node_modules
+**/wwwroot/dist
+**/*.user
+**/*.suo
+**/.vscode
+
