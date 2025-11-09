@@ -1,5 +1,5 @@
 using MediatR;
-using Mc2.CrudTest.Application.DTOs;
+using Mc2.CrudTest.Contracts;
 
 namespace Mc2.CrudTest.Application.Commands;
 
