@@ -32,6 +32,10 @@ namespace Mc2.CrudTest.Presentation
             builder.Services.AddValidatorsFromAssembly(
                 typeof(Mc2.CrudTest.Application.Commands.CreateCustomerCommand).Assembly);
 
+            // Register Validation Pipeline Behavior
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>),
+                typeof(Mc2.CrudTest.Application.Behaviors.ValidationBehavior<,>));
+
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 

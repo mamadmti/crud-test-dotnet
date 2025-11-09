@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mc2.CrudTest.Application.Commands;
 using Mc2.CrudTest.Application.Queries;
 using Mc2.CrudTest.Contracts;
+using FluentValidation;
 
 namespace Mc2.CrudTest.Presentation.Server.Controllers;
 
@@ -26,6 +27,10 @@ public class CustomersController : ControllerBase
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
         catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+        catch (ValidationException ex)
         {
             return BadRequest(new { error = ex.Message });
         }
@@ -73,13 +78,17 @@ public class CustomersController : ControllerBase
         try
         {
             var result = await _mediator.Send(command);
-
-            if (result == null)
-                return NotFound();
-
             return Ok(result);
         }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
         catch (InvalidOperationException ex)
+        {
+            return Conflict(new { error = ex.Message });
+        }
+        catch (ValidationException ex)
         {
             return BadRequest(new { error = ex.Message });
         }
@@ -97,7 +106,7 @@ public class CustomersController : ControllerBase
             await _mediator.Send(new DeleteCustomerCommand { Id = id });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (KeyNotFoundException ex)
         {
             return NotFound(new { error = ex.Message });
         }
